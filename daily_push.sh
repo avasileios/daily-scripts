@@ -1,10 +1,10 @@
 #!/bin/bash
-# Daily push for avasileios/daily-scripts — made to look organic:
+# Daily push for avasileios/daily-scripts — runs entirely on the local Ubuntu server.
 #   * only commits inside a natural window (08:00-23:00)
 #   * ~25% chance to skip on any given run (so the commit time varies)
 #   * random commit message from a pool
 # Silent on skip/success; prints an error message only on failure.
-cd /var/www/projects/daily-scripts || exit 1
+cd /home/alfanitaf/daily-scripts || exit 1
 
 HOUR=$(date +%-H)
 if [ "$HOUR" -lt 8 ] || [ "$HOUR" -gt 23 ]; then
@@ -17,7 +17,7 @@ fi
 
 python3 generate_daily.py || exit 1
 
-if [ -z "$(sudo git status --porcelain)" ]; then
+if [ -z "$(git status --porcelain)" ]; then
   exit 0  # nothing new today
 fi
 
@@ -32,8 +32,8 @@ MESSAGES=(
 )
 MSG=${MESSAGES[$((RANDOM % ${#MESSAGES[@]}))]}
 
-sudo git add -A
-sudo git -c user.name="Vasileios Antonopoulos" -c user.email="antvasileios@gmail.com" \
+git add -A
+git -c user.name="Vasileios Antonopoulos" -c user.email="antvasileios@gmail.com" \
   commit -m "$MSG" > /dev/null 2>&1 || exit 1
-sudo git push origin main > /dev/null 2>&1 || exit 1
+git push origin main > /dev/null 2>&1 || exit 1
 exit 0
