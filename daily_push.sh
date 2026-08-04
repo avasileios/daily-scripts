@@ -1,17 +1,39 @@
 #!/bin/bash
-# Daily push for avasileios/daily-scripts
-# Runs the generator, commits any new log, pushes. Silent on success (no changes).
+# Daily push for avasileios/daily-scripts — made to look organic:
+#   * only commits inside a natural window (08:00-23:00)
+#   * ~25% chance to skip on any given run (so the commit time varies)
+#   * random commit message from a pool
+# Silent on skip/success; prints an error message only on failure.
 cd /var/www/projects/daily-scripts || exit 1
+
+HOUR=$(date +%-H)
+if [ "$HOUR" -lt 8 ] || [ "$HOUR" -gt 23 ]; then
+  exit 0  # outside natural hours
+fi
+
+if [ $((RANDOM % 100)) -lt 25 ]; then
+  exit 0  # skip this run — next run may do it
+fi
 
 python3 generate_daily.py || exit 1
 
 if [ -z "$(sudo git status --porcelain)" ]; then
-  exit 0  # nothing new (already logged today)
+  exit 0  # nothing new today
 fi
 
 TODAY=$(date +%F)
+MESSAGES=(
+  "Daily log and scripts update ($TODAY)"
+  "Add today's experiment ($TODAY)"
+  "Daily notes + new script"
+  "Fresh daily entry"
+  "Update logs and scripts"
+  "Add daily experiment ($TODAY)"
+)
+MSG=${MESSAGES[$((RANDOM % ${#MESSAGES[@]}))]}
+
 sudo git add -A
 sudo git -c user.name="Vasileios Antonopoulos" -c user.email="antvasileios@gmail.com" \
-  commit -m "Daily log and scripts update ($TODAY)" > /dev/null 2>&1
+  commit -m "$MSG" > /dev/null 2>&1 || exit 1
 sudo git push origin main > /dev/null 2>&1 || exit 1
 exit 0
