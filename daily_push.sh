@@ -36,4 +36,14 @@ git add -A
 git -c user.name="Vasileios Antonopoulos" -c user.email="antvasileios@gmail.com" \
   commit -m "$MSG" > /dev/null 2>&1 || exit 1
 git push origin main > /dev/null 2>&1 || exit 1
+
+# Notify on push, but only for the first 10 pushes (counter in $HOME).
+COUNT_FILE="$HOME/.daily_push_count"
+COUNT=0
+[ -f "$COUNT_FILE" ] && COUNT=$(cat "$COUNT_FILE")
+if [ "$COUNT" -lt 10 ]; then
+  COUNT=$((COUNT + 1))
+  echo "$COUNT" > "$COUNT_FILE"
+  echo "✅ GitHub push #${COUNT}/10: ${MSG}"
+fi
 exit 0
