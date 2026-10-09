@@ -4,7 +4,7 @@
 #   * ~25% chance to skip on any given run (so the commit time varies)
 #   * random commit message from a pool
 # Silent on skip/success; prints an error message only on failure.
-cd "$(cd "$(dirname "$0")" && pwd)" || exit 1
+cd /home/alfanitaf/daily-scripts || exit 1
 
 HOUR=$(date +%-H)
 if [ "$HOUR" -lt 8 ] || [ "$HOUR" -gt 23 ]; then
